@@ -3,7 +3,7 @@ import requests
 
 import json
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from pydantic import BaseModel, Field
@@ -11,8 +11,8 @@ from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from app.clover_service import create_order, add_line_item
 from app.clover_service import create_order
+from app.clover_service import add_line_item
 from app.clover_service import create_card_token
 from app.clover_service import pay_order
 
@@ -41,15 +41,6 @@ app.add_middleware(
 class PaymentRequest(BaseModel):
     amount: float = Field(gt = 0)                 # amount should always be +ve and greater than 0.
     description: str = Field(min_length = 1)      # cannot be an empty string
-
-def process_test_payment(order_id: str, amount_cents: int):
-    return {
-        "id": None,
-        "status": "PAYMENT_NOT_IMPLEMENTED",
-        "message": "Order and line item created. Payment token integration pending.",
-        "order_id": order_id,
-        "amount_cents": amount_cents,
-    }
 
 @app.get("/")
 def root():
@@ -105,14 +96,6 @@ def create_payment(payment: PaymentRequest):
     card_token = create_card_token()
     payment_result = pay_order(order["id"], card_token["id"])
     payment_body = json.loads(payment_result["body"])
-
-    line_item = add_line_item(
-        order_id = order_id,
-        description = payment.description,
-        amount_cents = cent_conv
-    )
-
-    payment_result = pay_order(order_id, amount_cents)
 
     #recording transaction
     transaction = {
