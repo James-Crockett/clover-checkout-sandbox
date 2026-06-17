@@ -39,3 +39,11 @@ After the submission, the backend should:
 - Fetch the payment status
 - Log the transaction
 - Return the status to the front end
+
+## Clover Integration
+
+- Create clover config
+- Create env.example file
+- Add Clover deps
+- Create clover service
+- Write it to /api/payments
