@@ -19,10 +19,26 @@ def root():
 
 @app.post("/api/payments")
 def create_payment(payment: PaymentRequest):
+
+    cent_conv = int(payment.amount * 100)       # converting amount to int and cents
+
+    #recording transaction
+    transaction = {
+        "timestamp": datetime.utcnow().isoformat(),   
+        "amount": payment.amount,
+        "amt_conv_format": cent_conv,
+        "description": payment.description,
+        "status": "SUCCESS"  
+    }
+
+    with open("apt/transaction.log","a") as file:   #logging transaxtion
+        file.write(json.dumps(transaction) + "\n")
+
     return{
         "success": True,
         "status":"SUCCESS",
         "amount": payment.amount,
+        "amt_conv_format": cent_conv,
         "description": payment.description,
-        "message": "Payment endpoint working"
+        "message": "Payment endpoint working and transaction logged"
     }
