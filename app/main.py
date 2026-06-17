@@ -90,20 +90,6 @@ def oauth_callback(code: str, merchant_id: str | None = None):
         "merchant_id": merchant_id,
     }
 
-
-@app.get("/api/clover/test")
-def test_clover_connection():
-    url = f"{CLOVER_BASE_URL}/v3/merchants/{CLOVER_MERCHANT_ID}"
-
-    response = requests.get(url, headers={
-        "Authorization": f"Bearer {CLOVER_ACCESS_TOKEN}"
-    })
-
-    return {
-        "status_code": response.status_code,
-        "response": response.json()
-    }
-
 @app.post("/api/payments")
 def create_payment(payment: PaymentRequest):
 
@@ -153,24 +139,3 @@ def create_payment(payment: PaymentRequest):
         "charge_id": payment_body.get("charge"),
         "payment": payment_body
     }
-
-@app.get("/api/clover/create-card-token")
-def test_create_card_token():
-    return create_card_token()
-
-@app.get("/api/clover/test-pay")
-def test_pay():
-    order = create_order()
-
-    add_line_item(
-        order["id"],
-        "Test Coffee",
-        500
-    )
-
-    token = create_card_token()
-
-    return pay_order(
-        order["id"],
-        token["id"]
-    )
