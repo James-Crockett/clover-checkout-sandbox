@@ -102,7 +102,6 @@ def test_clover_connection():
         "response": response.json()
     }
 
-
 @app.post("/api/payments")
 def create_payment(payment: PaymentRequest):
 
