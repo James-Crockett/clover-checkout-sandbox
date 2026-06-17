@@ -1,12 +1,25 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+import os
+import requests
+
 import json
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
+
+from pydantic import BaseModel, Field
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
 from app.clover_service import create_order, add_line_item
 
 app = FastAPI()
+load_dotenv()
+
+CLOVER_OAUTH_BASE_URL = os.getenv("CLOVER_OAUTH_BASE_URL")
+CLOVER_APP_ID = os.getenv("CLOVER_APP_ID")
+CLOVER_APP_SECRET = os.getenv("CLOVER_APP_SECRET")
+CLOVER_REDIRECT_URI = os.getenv("CLOVER_REDIRECT_URI")
 
 # CORS preflight request handling
 app.add_middleware(
@@ -27,6 +40,39 @@ class PaymentRequest(BaseModel):
 def root():
     return {
         "message": "Payment backend running"
+    }
+
+# adding oauth routes
+@app.get("/oauth/start")
+def oauth_start():
+    auth_url = (
+        f"{CLOVER_OAUTH_BASE_URL}/oauth/authorize"
+        f"?client_id={CLOVER_APP_ID}"
+        f"&redirect_uri={CLOVER_REDIRECT_URI}"
+        f"&response_type=code"
+    )
+
+    return RedirectResponse(auth_url)
+
+# adding oauth callback
+@app.get("/oauth/callback")
+def oauth_callback(code: str, merchant_id: str | None = None):
+    token_url = f"{CLOVER_OAUTH_BASE_URL}/oauth/token"
+
+    payload = {
+        "client_id": CLOVER_APP_ID,
+        "client_secret": CLOVER_APP_SECRET,
+        "code": code,
+        "redirect_uri": CLOVER_REDIRECT_URI,
+        "grant_type": "authorization_code",
+    }
+
+    response = requests.post(token_url, data=payload)
+
+    return {
+        "status_code": response.status_code,
+        "response": response.json(),
+        "merchant_id": merchant_id,
     }
 
 @app.post("/api/payments")
