@@ -40,6 +40,15 @@ class PaymentRequest(BaseModel):
     amount: float = Field(gt = 0)                 # amount should always be +ve and greater than 0.
     description: str = Field(min_length = 1)      # cannot be an empty string
 
+def process_test_payment(order_id: str, amount_cents: int):
+    return {
+        "id": None,
+        "status": "PAYMENT_NOT_IMPLEMENTED",
+        "message": "Order and line item created. Payment token integration pending.",
+        "order_id": order_id,
+        "amount_cents": amount_cents,
+    }
+
 @app.get("/")
 def root():
     return {
@@ -112,14 +121,20 @@ def create_payment(payment: PaymentRequest):
         amount_cents = cent_conv
     )
 
+    payment_result = process_test_payment(
+        order_id = order_id,
+        amount_cents = cent_conv
+    )
+
     #recording transaction
     transaction = {
         "timestamp": datetime.utcnow().isoformat(),   
         "order_id": order_id,
         "line_item_id": line_item.get("id"),
-        "amt_conv_format": cent_conv,
+        "amount": payment.amount,
+        "amt_cents": cent_conv,
         "description": payment.description,
-        "status": "ORDER_CREATED"  
+        "status": payment_result["status"] 
     }
 
     with open("apt/transaction.log","a") as file:   #logging transaxtion
@@ -128,8 +143,8 @@ def create_payment(payment: PaymentRequest):
     # return result to font page
     return{
         "success": True,
-        "status":"SUCCESS",
+        "status":"ORDER_CREATED_PAYMENT_PENDING",
         "order_id": order_id,
         "line_item": line_item,
-        "message": "Payment endpoint working and transaction logged"
+        "payment": payment_result
     }
