@@ -17,7 +17,7 @@ Before I go into building the application, I forgot to go into the structure of 
 
 A web based checkout app integrated with a clover api
 
-# Input
+## Input
 
 By the requirements, the user has to give:
 - An amount - int
