@@ -80,3 +80,28 @@ def pay_order(order_id: str, amount_cents: int):
 
     response.raise_for_status()
     return response.json()
+
+def create_card_token():
+    url = f"{CLOVER_TOKEN_BASE_URL}/v1/tokens"
+
+    payload = {
+        "card": {
+            "number": "4111111111111111",
+            "exp_month": "12",
+            "exp_year": "2035",
+            "cvv": "123",
+            "last4": "1111",
+            "first6": "411111",
+            "brand": "VISA"
+        }
+    }
+
+    headers = {
+        "apikey": CLOVER_ECOMM_PUBLIC_TOKEN,
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()

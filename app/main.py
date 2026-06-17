@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 
 from app.clover_service import create_order, add_line_item
 from app.clover_service import create_order
+from app.clover_service import create_card_token
 
 app = FastAPI()
 load_dotenv()
@@ -141,3 +142,7 @@ def create_payment(payment: PaymentRequest):
         "line_item": line_item,
         "payment": payment_result
     }
+
+@app.get("/api/clover/create-card-token")
+def test_create_card_token():
+    return create_card_token()
