@@ -88,6 +88,7 @@ def pay_order(order_id: str, source_token: str):
 def create_card_token():
     url = f"{CLOVER_TOKEN_BASE_URL}/v1/tokens"
 
+    #sample payload, real info would come from the card readers
     payload = {
         "card": {
             "number": "4111111111111111",

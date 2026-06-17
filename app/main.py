@@ -109,9 +109,16 @@ def create_payment(payment: PaymentRequest):
 
     cent_conv = int(payment.amount * 100)       # converting amount to int and cents
 
-    #triggering order
+    # Create an order
+    # Add the requested item as a line item
+    # Generate a sandbox card token
+    # Submit payment for the order
+    # Parse the payment response for logging and API output
     order = create_order()
-    order_id = order["id"]
+    line_item = add_line_item(order["id"], payment.description, amount_cents)
+    card_token = create_card_token()
+    payment_result = pay_order(order["id"], card_token["id"])
+    payment_body = json.loads(payment_result["body"])
 
     line_item = add_line_item(
         order_id = order_id,
@@ -123,25 +130,28 @@ def create_payment(payment: PaymentRequest):
 
     #recording transaction
     transaction = {
-        "timestamp": datetime.utcnow().isoformat(),   
-        "order_id": order_id,
+        "timestamp": datetime.utcnow().isoformat(),
+        "order_id": order["id"],
         "line_item_id": line_item.get("id"),
         "amount": payment.amount,
-        "amt_cents": cent_conv,
+        "amount_cents": amount_cents,
         "description": payment.description,
-        "status": payment_result["status"] 
+        "status": payment_result["body"]
     }
 
     with open("apt/transaction.log","a") as file:   #logging transaxtion
         file.write(json.dumps(transaction) + "\n")
 
+
+    
     # return result to font page
-    return{
+    return {
         "success": True,
-        "status":"ORDER_CREATED_PAYMENT_PENDING",
-        "order_id": order_id,
-        "line_item": line_item,
-        "payment": payment_result
+        "status": payment_body.get("status"),
+        "order_id": order["id"],
+        "amount_paid": payment_body.get("amount_paid"),
+        "charge_id": payment_body.get("charge"),
+        "payment": payment_body
     }
 
 @app.get("/api/clover/create-card-token")
