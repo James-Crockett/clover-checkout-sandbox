@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from app.clover_service import create_order, add_line_item
+from app.clover_service import create_order
 
 app = FastAPI()
 load_dotenv()
@@ -78,6 +79,7 @@ def oauth_callback(code: str, merchant_id: str | None = None):
         "merchant_id": merchant_id,
     }
 
+
 @app.get("/api/clover/test")
 def test_clover_connection():
     url = f"{CLOVER_BASE_URL}/v3/merchants/{CLOVER_MERCHANT_ID}"
@@ -90,6 +92,10 @@ def test_clover_connection():
         "status_code": response.status_code,
         "response": response.json()
     }
+
+@app.get("/api/clover/create-order")
+def test_create_order():
+    return create_order()
 
 @app.post("/api/payments")
 def create_payment(payment: PaymentRequest):
