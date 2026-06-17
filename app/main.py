@@ -102,9 +102,6 @@ def test_clover_connection():
         "response": response.json()
     }
 
-@app.get("/api/clover/create-order")
-def test_create_order():
-    return create_order()
 
 @app.post("/api/payments")
 def create_payment(payment: PaymentRequest):
@@ -121,10 +118,7 @@ def create_payment(payment: PaymentRequest):
         amount_cents = cent_conv
     )
 
-    payment_result = process_test_payment(
-        order_id = order_id,
-        amount_cents = cent_conv
-    )
+    payment_result = pay_order(order_id, amount_cents)
 
     #recording transaction
     transaction = {
