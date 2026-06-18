@@ -20,7 +20,7 @@ class OAuthStorageTests(unittest.TestCase):
             patch("builtins.open", mock_open()) as token_file,
             patch("app.main.os.chmod") as chmod,
         ):
-            oauth_callback("authorization_code", "merchant_id")
+            result = oauth_callback("authorization_code", "merchant_id")
 
         # json.dump writes the document in chunks, so combine every mocked write.
         stored_json = "".join(call.args[0] for call in token_file().write.call_args_list)
@@ -30,6 +30,10 @@ class OAuthStorageTests(unittest.TestCase):
         self.assertEqual(stored_data["access_token"], "access_token")
         self.assertEqual(stored_data["refresh_token"], "refresh_token")
         self.assertEqual(stored_data["merchant_id"], "merchant_id")
+
+        # Confirm sensitive tokens are not returned to the browser.
+        self.assertNotIn("access_token", result)
+        self.assertNotIn("refresh_token", result)
 
         # Confirm only the current operating-system user can access the token file.
         chmod.assert_called_once_with("app/oauth_tokens.json", 0o600)

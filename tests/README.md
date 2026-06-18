@@ -13,3 +13,8 @@ Verifies that Clover requests apply a timeout without contacting the real API.
 
 The current tests cover `create_order()`, `add_line_item()`, `pay_order()`,
 `create_card_token()`, and the OAuth token exchange.
+
+## `test_oauth_storage.py`
+
+Verifies that the OAuth callback stores the access token, refresh token, and
+merchant ID locally with owner-only file permissions.
