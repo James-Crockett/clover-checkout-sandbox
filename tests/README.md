@@ -23,3 +23,8 @@ merchant ID locally with owner-only file permissions.
 
 Verifies that stored access-token expiration timestamps are compared against the
 current Unix time correctly.
+
+## `test_token_refresh.py`
+
+Verifies that the current refresh token is sent to Clover's refresh endpoint and
+that the new access and refresh token pair is returned.

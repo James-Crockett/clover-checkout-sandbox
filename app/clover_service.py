@@ -11,6 +11,8 @@ load_dotenv()
 # loading env variables
 CLOVER_BASE_URL = os.getenv("CLOVER_BASE_URL")
 CLOVER_TOKEN_BASE_URL = os.getenv("CLOVER_TOKEN_BASE_URL")
+CLOVER_APP_ID = os.getenv("CLOVER_APP_ID")
+CLOVER_OAUTH_API_URL = os.getenv("CLOVER_OAUTH_API_URL")
 CLOVER_ECOMM_PUBLIC_TOKEN = os.getenv("CLOVER_ECOMM_PUBLIC_TOKEN")
 CLOVER_ECOMM_PRIVATE_TOKEN = os.getenv("CLOVER_ECOMM_PRIVATE_TOKEN")
 
@@ -22,6 +24,19 @@ def load_oauth_tokens():
 
 def access_token_expired(token_data: dict):
     return time.time() >= token_data["access_token_expiration"]
+
+
+def refresh_oauth_tokens(refresh_token: str):
+    # Exchange Clover's single-use refresh token for a new token pair.
+    url = f"{CLOVER_OAUTH_API_URL}/oauth/v2/refresh"
+    payload = {"client_id": CLOVER_APP_ID, "refresh_token": refresh_token}
+
+    # Stop if Clover rejects or cannot process the refresh request.
+    response = requests.post(url, json=payload, timeout=10)
+    response.raise_for_status()
+
+    # The caller will replace the stored access and refresh tokens with this pair.
+    return response.json()
 
 
 # auth call and data format
