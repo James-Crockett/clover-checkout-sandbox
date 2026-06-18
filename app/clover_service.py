@@ -27,23 +27,39 @@ def access_token_expired(token_data: dict):
 
 
 def refresh_oauth_tokens(refresh_token: str):
-    # Exchange Clover's single-use refresh token for a new token pair.
+    # exchange clover single-use refresh token for a new token pair
     url = f"{CLOVER_OAUTH_API_URL}/oauth/v2/refresh"
     payload = {"client_id": CLOVER_APP_ID, "refresh_token": refresh_token}
 
-    # Stop if Clover rejects or cannot process the refresh request.
+    # stop if clover rejects or cannot process the refresh request
     response = requests.post(url, json=payload, timeout=10)
     response.raise_for_status()
 
-    # The caller will replace the stored access and refresh tokens with this pair.
+    # caller will replace the stored access and refresh tokens with this pair
     return response.json()
 
 
 # auth call and data format
 def get_headers():
-    access_token = load_oauth_tokens()["access_token"]
+    token_data = load_oauth_tokens()
+
+    # refresh and store the token pair before using an expired access token
+    if access_token_expired(token_data):
+        try:
+            new_tokens = refresh_oauth_tokens(token_data["refresh_token"])
+        except requests.RequestException as error:
+            raise RuntimeError(
+                "clover authorization expired, visit /oauth/start"
+            ) from error
+
+        new_tokens["merchant_id"] = token_data["merchant_id"]
+        with open("app/oauth_tokens.json", "w") as file:
+            json.dump(new_tokens, file)
+        os.chmod("app/oauth_tokens.json", 0o600)
+        token_data = new_tokens
+
     return {
-        "Authorization": f"Bearer {access_token}",
+        "Authorization": f"Bearer {token_data['access_token']}",
         "Content-Type": "application/json",
     }
 
