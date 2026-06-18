@@ -85,11 +85,11 @@ def create_payment(payment: PaymentRequest):
     try:
         amount_cents = int(payment.amount * 100)  # converting amount to int and cents
 
-        # Create an order
-        # Add the requested item as a line item
-        # Generate a sandbox card token
-        # Submit payment for the order
-        # Parse the payment response for logging and API output
+        # create an order
+        # add the requested item as a line item
+        # generate a sandbox card token
+        # submit payment for the order
+        # parse the payment response for logging and API output
         order = create_order()
         line_item = add_line_item(order["id"], payment.description, amount_cents)
         card_token = create_card_token()
@@ -121,6 +121,12 @@ def create_payment(payment: PaymentRequest):
             "payment": payment_body,
         }
 
+    # clover returned an unsuccessful HTTP response
+    except requests.HTTPError as e:
+        raise HTTPException(
+            status_code=502, detail="Clover rejected the payment request"
+        ) from e
+    # unexpected error
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Payment processing failed: {str(e)}"
