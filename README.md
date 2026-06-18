@@ -1,10 +1,19 @@
 # checkout-app-clover
 
-A local checkout prototype that creates and pays Clover sandbox orders
+A local checkout page that creates and pays Clover sandbox orders
 
 ## Setup
 
-Requires Python 3.12, `uv`, a Clover sandbox app, and a test merchant
+- Install Python 3.12
+- Install `uv`
+- Go to https://sandbox.dev.clover.com/ (setup acc if you dont have one)
+- Create a test merchant (or use the existing one), you should see the merchant id.
+- Clover sandbox app (you will have APP ID and APP SECRET)
+  - Select app type to as 'web'
+  - Edit permissions - Merchant - read, for order and payments choose both read and write, also enable online payments
+  - In REST Configuration - give site url as 'http://localhost:8000/oauth/callback', alternative - '/', CORS domain - 'http://localhost:8000', Default OAuth - Code.
+- For ECOMM private and public token, settings - view all settings - Ecommerce - Ecom API tokens
+- For URL refer clover docs.
 
 ```bash
 uv sync
@@ -24,27 +33,23 @@ Fill `.env` with Clover sandbox URLs, app credentials, redirect URI, and Ecommer
 | `CLOVER_OAUTH_AUTHORIZE_URL` | Clover authorization page |
 | `CLOVER_OAUTH_API_URL` | OAuth token and refresh API |
 
-Enable read and write permissions for Orders and Payments, read permission for
-Merchant, and Ecommerce online payments in the Clover app settings
 
 ## Run
 
 ```bash
 uv run uvicorn app.main:app --reload
-python -m http.server 5500 --directory frontend
+Then open frontend/index.html
 ```
-
-Run each command in a separate terminal and open `http://localhost:5500`
 
 ## OAuth
 
-1. Open `http://localhost:8000/oauth/start` and authorize the app
-2. Clover redirects to `/oauth/callback`
-3. The backend stores the token pair and merchant ID
-4. Merchant requests use the stored token and refresh it once when expired
-5. A failed refresh requires authorization through `/oauth/start` again
+- Open `http://localhost:8000/oauth/start` and authorize the app
+- Clover redirects to `/oauth/callback`
+- The backend stores the token pair and merchant ID
+- Merchant requests use the stored token and refresh it once when expired
+- A failed refresh requires authorization through `/oauth/start` again
 
-Tokens are stored in Git-ignored `app/oauth_tokens.json` with owner-only permissions
+Tokens are stored in `app/oauth_tokens.json` (git-ignored) with owner-only permissions
 
 ## Payment Flow
 
