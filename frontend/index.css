@@ -134,6 +134,18 @@ button:hover {
     text-transform: uppercase;
 }
 
+#payment-status {
+    font-weight: bold;
+}
+
+.success {
+    color: #137333;
+}
+
+.failed {
+    color: #b42318;
+}
+
 #result {
     max-height: 140px;
     margin: 0;

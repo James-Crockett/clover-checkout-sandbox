@@ -37,6 +37,7 @@
 
                 <div class="result-panel">
                     <h3>Payment result</h3>
+                    <p id="payment-status"></p>
                     <pre id="result"></pre>
                 </div>
             </section>
@@ -66,6 +67,14 @@
 
                 // await till server response
                 const data = await response.json();
+
+                // show a clear payment outcome above the api response
+                const paymentStatus =
+                    document.getElementById("payment-status");
+                paymentStatus.innerText = response.ok
+                    ? "Payment successful"
+                    : "Payment failed";
+                paymentStatus.className = response.ok ? "success" : "failed";
 
                 // displays the result that we get from the API
                 document.getElementById("result").innerText = JSON.stringify(
