@@ -82,8 +82,8 @@ def oauth_callback(code: str, merchant_id: str | None = None):
     os.chmod("app/oauth_tokens.json", 0o600)
 
     return {
-        "status_code": response.status_code,
-        "response": token_data,
+        "success": True,
+        "message": "Clover authorization completed",
         "merchant_id": merchant_id,
     }
 
