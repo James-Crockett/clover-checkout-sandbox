@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
+from starlette.exceptions import HTTPException
 
 from app.clover_service import add_line_item, create_card_token, create_order, pay_order
 
@@ -81,40 +82,43 @@ def oauth_callback(code: str, merchant_id: str | None = None):
 
 @app.post("/api/payments")
 def create_payment(payment: PaymentRequest):
+    try:
+        amount_cents = int(payment.amount * 100)  # converting amount to int and cents
 
-    amount_cents = int(payment.amount * 100)  # converting amount to int and cents
+        # Create an order
+        # Add the requested item as a line item
+        # Generate a sandbox card token
+        # Submit payment for the order
+        # Parse the payment response for logging and API output
+        order = create_order()
+        line_item = add_line_item(order["id"], payment.description, amount_cents)
+        card_token = create_card_token()
+        payment_result = pay_order(order["id"], card_token["id"])
+        payment_body = json.loads(payment_result["body"])
 
-    # Create an order
-    # Add the requested item as a line item
-    # Generate a sandbox card token
-    # Submit payment for the order
-    # Parse the payment response for logging and API output
-    order = create_order()
-    line_item = add_line_item(order["id"], payment.description, amount_cents)
-    card_token = create_card_token()
-    payment_result = pay_order(order["id"], card_token["id"])
-    payment_body = json.loads(payment_result["body"])
+        # recording transaction
+        transaction = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "order_id": order["id"],
+            "line_item_id": line_item.get("id"),
+            "amount": payment.amount,
+            "amount_cents": amount_cents,
+            "description": payment.description,
+            "status": payment_body.get("status"),
+            "charge_id": payment_body.get("charge"),
+        }
 
-    # recording transaction
-    transaction = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "order_id": order["id"],
-        "line_item_id": line_item.get("id"),
-        "amount": payment.amount,
-        "amount_cents": amount_cents,
-        "description": payment.description,
-        "status": payment_body.get("status"),
-        "charge_id": payment_body.get("charge"),
-    }
+        with open("app/transaction.log", "a") as file:  # logging transaxtion
+            file.write(json.dumps(transaction) + "\n")
 
-    with open("app/transaction.log", "a") as file:  # logging transaxtion
-        file.write(json.dumps(transaction) + "\n")
+        # return result to font page
+        return {
+            "success": True,
+            "status": payment_body.get("status"),
+            "order_id": order["id"],
+            "amount_paid": payment_body.get("amount_paid"),
+            "charge_id": payment_body.get("charge"),
+        }
 
-    # return result to font page
-    return {
-        "success": True,
-        "status": payment_body.get("status"),
-        "order_id": order["id"],
-        "amount_paid": payment_body.get("amount_paid"),
-        "charge_id": payment_body.get("charge"),
-    }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
