@@ -15,6 +15,7 @@ from app.clover_service import add_line_item, create_card_token, create_order, p
 app = FastAPI()
 load_dotenv()
 
+# loading env variables
 CLOVER_APP_ID = os.getenv("CLOVER_APP_ID")
 CLOVER_APP_SECRET = os.getenv("CLOVER_APP_SECRET")
 CLOVER_REDIRECT_URI = os.getenv("CLOVER_REDIRECT_URI")
@@ -39,12 +40,18 @@ class PaymentRequest(BaseModel):
     description: str = Field(min_length=1)  # cannot be an empty string
 
 
+# health check
 @app.get("/")
 def root():
     return {"message": "Payment backend running"}
 
 
-# adding oauth routes
+# = = = = = = = = = = = = = = = = = = = =
+#    OAuth2 authorization flow
+# = = = = = = = = = = = = = = = = = = = =
+
+
+# send merchant to clover, get one time auth code
 @app.get("/oauth/start")
 def oauth_start():
     auth_url = (
@@ -57,11 +64,12 @@ def oauth_start():
     return RedirectResponse(auth_url)
 
 
-# adding oauth callback
+# clover calls back with auth code
 @app.get("/oauth/callback")
 def oauth_callback(code: str, merchant_id: str | None = None):
     token_url = f"{CLOVER_OAUTH_API_URL}/oauth/v2/token"
 
+    # swap one time code with refresh token pair
     payload = {
         "client_id": CLOVER_APP_ID,
         "client_secret": CLOVER_APP_SECRET,
@@ -71,7 +79,7 @@ def oauth_callback(code: str, merchant_id: str | None = None):
     }
 
     response = requests.post(token_url, json=payload, timeout=10)
-    response.raise_for_status()
+    response.raise_for_status()  # get out if clover rejects exchange
 
     # stores OAuth tokens locally
     token_data = response.json()
@@ -80,6 +88,7 @@ def oauth_callback(code: str, merchant_id: str | None = None):
         json.dump(token_data, file)
     os.chmod("app/oauth_tokens.json", 0o600)
 
+    # returns confirmation back to browser
     return {
         "success": True,
         "message": "Clover authorization completed",
