@@ -73,10 +73,11 @@ def oauth_callback(code: str, merchant_id: str | None = None):
 
     response = requests.post(token_url, json=payload, timeout=10)
     response.raise_for_status()
+    token_data = response.json()
 
     return {
         "status_code": response.status_code,
-        "response": response.json(),
+        "response": token_data,
         "merchant_id": merchant_id,
     }
 
