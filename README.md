@@ -38,8 +38,10 @@ Fill `.env` with Clover sandbox URLs, app credentials, redirect URI, and Ecommer
 
 ```bash
 uv run uvicorn app.main:app --reload
-Then open frontend/index.html
+python -m http.server 5500 --directory frontend
 ```
+
+Run each command in a separate terminal and open `http://localhost:5500`
 
 ## OAuth
 
