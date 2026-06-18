@@ -1,27 +1,46 @@
 <!doctype html>
-
-<link rel="stylesheet" href="index.css" />
-
 <html>
     <head>
+        <meta charset="utf-8" />
         <title>Checkout</title>
+        <link rel="stylesheet" href="index.css" />
     </head>
 
     <body>
-        <h2>Test Checkout</h2>
+        <main class="checkout">
+            <section class="summary">
+                <p class="merchant">Checkout</p>
+                <h1>Complete your payment</h1>
+                <p class="summary-text">
+                    Enter the payment amount and a short description.
+                </p>
+            </section>
 
-        <label>Amount</label><br />
-        <input id="amount" type="number" step="0.01" placeholder="19.99" />
-        <br /><br />
+            <section class="payment">
+                <h2>Payment details</h2>
 
-        <label>Description</label><br />
-        <input id="description" type="text" step="0.01" placeholder="Desc" />
-        <br /><br />
+                <label for="amount">Amount</label>
+                <div class="amount-field">
+                    <span>$</span>
+                    <input id="amount" type="number" />
+                </div>
 
-        <button onclick="submitPayment()">Submit</button>
+                <label for="description">Description</label>
+                <input
+                    id="description"
+                    type="text"
+                    step="0.01"
+                    placeholder="What is this payment for?"
+                />
 
-        <h3>Result</h3>
-        <pre id="result"></pre>
+                <button onclick="submitPayment()">Pay now</button>
+
+                <div class="result-panel">
+                    <h3>Payment result</h3>
+                    <pre id="result"></pre>
+                </div>
+            </section>
+        </main>
 
         <!-- async function -->
         <script>
