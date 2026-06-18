@@ -84,4 +84,4 @@ official Clover test card or reset the sandbox test data
 
 ## Tests
 
-Run `python -m unittest discover -s tests -v` See `tests/README.md` for details
+Run ` uv run python -m unittest discover -s tests -v` See `tests/README.md` for details
