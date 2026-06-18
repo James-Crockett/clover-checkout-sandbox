@@ -67,7 +67,7 @@ def pay_order(order_id: str, source_token: str):
     }
 
     response = requests.post(url, headers=headers, json=payload)
-
+    response.raise_for_status()
     return {"status_code": response.status_code, "body": response.text}
 
 
