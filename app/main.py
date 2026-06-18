@@ -72,7 +72,8 @@ def oauth_callback(code: str, merchant_id: str | None = None):
         "grant_type": "authorization_code",
     }
 
-    response = requests.post(token_url, data=payload, timeout=10)
+    response = requests.post(token_url, json=payload, timeout=10)
+    response.raise_for_status()
 
     return {
         "status_code": response.status_code,
