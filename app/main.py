@@ -118,6 +118,7 @@ def create_payment(payment: PaymentRequest):
             "order_id": order["id"],
             "amount_paid": payment_body.get("amount_paid"),
             "charge_id": payment_body.get("charge"),
+            "payment": payment_body,
         }
 
     except Exception as e:
