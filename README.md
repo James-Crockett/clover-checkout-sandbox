@@ -1,6 +1,5 @@
-# checkout-app-clover
-
-A local checkout page that creates and pays Clover sandbox orders
+# Clover Checkout Sandbox
+A local checkout page that creates and pays Clover sandbox orders.
 
 ## Setup
 
